@@ -1,0 +1,22 @@
+[package]
+name = "lv"
+version = "0.1.0"
+edition = "2021"
+description = "Terminal log viewer for SpolsMVC and Laravel applications"
+license = "MIT"
+repository = "https://github.com/Blizzard-fs/lv"
+keywords = ["log", "tui", "laravel", "terminal"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "lv"
+path = "src/main.rs"
+
+[dependencies]
+ratatui   = "0.29"
+crossterm = "0.28"
+
+[profile.release]
+opt-level = "z"
+lto       = true
+strip     = true
