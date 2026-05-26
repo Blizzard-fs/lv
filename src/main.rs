@@ -521,12 +521,23 @@ impl App {
     }
 
     fn toggle_sidebar(&mut self) {
-        self.sidebar_open = !self.sidebar_open;
-        if self.sidebar_open {
-            self.sidebar_state.select(Some(self.file_idx));
-            self.focus = Focus::Sidebar;
-        } else {
-            self.focus = Focus::List;
+        match (self.sidebar_open, &self.focus) {
+            // Closed - open and focus sidebar
+            (false, _) => {
+                self.sidebar_open = true;
+                self.sidebar_state.select(Some(self.file_idx));
+                self.focus = Focus::Sidebar;
+            }
+            // Open, focus on list - move focus to sidebar without closing
+            (true, Focus::List) => {
+                self.sidebar_state.select(Some(self.file_idx));
+                self.focus = Focus::Sidebar;
+            }
+            // Open, focus on sidebar - close it
+            (true, Focus::Sidebar) => {
+                self.sidebar_open = false;
+                self.focus = Focus::List;
+            }
         }
     }
 
@@ -827,7 +838,9 @@ fn draw_statusbar(frame: &mut Frame, app: &App, area: Rect) {
         ]
     } else {
         let follow_label = if app.follow { "f off  " } else { "f follow  " };
-        let picker_hint  = if app.files.len() > 1 { "p files  " } else { "" };
+        let picker_hint  = if app.files.len() > 1 && app.sidebar_open { "p/tab sidebar  " }
+                           else if app.files.len() > 1                 { "p files  " }
+                           else                                         { "" };
         vec![
             Span::styled("  ↑↓/jk", Style::default().fg(C_PURPLE).add_modifier(Modifier::BOLD)),
             Span::styled(" list  ", Style::default().fg(C_DIM)),
